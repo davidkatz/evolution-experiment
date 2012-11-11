@@ -4,14 +4,14 @@ At this stage, this is a pure 'messing around' side project. My first goal is to
 
 The desired process is modelled after evolution as best as I could muster. It starts from any set of characters (say, '324X!#$'), and then goes through a gradual process of:
 
-* making children (read: copy and mutate), and
-* selectively "surviving" those children (read: measure them against a fitness function which makes only the most fit child survive).
+* making children by copying and mutating the 'father' sentence
+* selectively killing/surviving these children by judging how well they match the goal sentence. 
 
 This is repeated ad-infinitum until your goal sentence is reached.
 
 Right now, this project supports three kind of mutations to sentences, each one of which can occur at a defined probability.
 
-* Random Letter Change (where, say 'a' turns into 'x')
+* Random Letter Change (say, 'a' -> 'x')
 * Letter Duplication ('a' -> 'aa')
 * Letter Deletion ('a' -> '')
 
