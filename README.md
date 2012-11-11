@@ -7,7 +7,7 @@ The desired process is modelled after evolution as best as I could muster. It st
 * making children by copying and mutating the 'father' sentence
 * selectively killing/surviving these children by judging how well they match the goal sentence. 
 
-This is repeated ad-infinitum until your goal sentence is reached.
+This is repeated until your goal sentence is reached or you give up.
 
 Right now, this project supports three kind of mutations to sentences, each one of which can occur at a defined probability.
 
