@@ -1,4 +1,5 @@
-import random, string
+import os, random, string
+import fitness_functions, config
 
 # simulates a rolling of a weighted die (as in dice). input is a dictionary 
 # with possible results and their assigned probabilities, output is what result
@@ -28,23 +29,56 @@ def roll_weighted_die(dice_dictionary):
 			return key
 		last += dice_dictionary[key]
 
+# takes an organism and returns a copy that may be mutated
+def copy_and_mutate_levenshtein_friendly(organism):
 
+	# first, make a copy
+	new_organism = list(organism); 
+
+	# to start the mutation action, define events and their string constants
+	letter_insert = 'LETTER_INSERT'
+	letter_delete = 'LETTER_DELETE'
+	letter_change = 'LETTER_CHANGE'
+
+	# define probabilities for mutation events 
+	event_probabilities = {
+		letter_insert: 0.15,
+		letter_delete: 0.15,
+		letter_change: 0.1
+	}
+
+	event = roll_weighted_die(event_probabilities)
+	change_site = random.randint(0,len(organism)-1)
+
+	if event == letter_change:
+		
+		new_organism[change_site] = random.choice(config.POSSIBLE_CHARACTERS)
+
+	if event == letter_delete:
+		
+		del new_organism[change_site]
+
+	if event == letter_insert:
+		
+		new_organism.insert(change_site,random.choice(config.POSSIBLE_CHARACTERS))
+	return new_organism	
+	
 # takes an organism and returns a copy that may be mutated
 def copy_and_mutate(organism):
-	
+
 	# first, make a copy
 	new_organism = list(organism); 
 
 	# to start the mutation action, define events and their string constants
 	letter_change = 'LETTER_CHANGE'
 	letter_deletion = 'LETTER_DELETION'
-	letter_duplication = 'LETTER_DUPLICATION'
+	insert_space = 'INSERT_SPACE'
 
 	# define probabilities for mutation events 
 	event_probabilities = {
-		letter_change: 0.01,
-		letter_deletion: 0.005,
-		letter_duplication: 0.005
+		letter_change: config.LETTER_CHANGE_CHANCE,
+		letter_deletion: config.LETTER_DELETION_CHANCE,
+		insert_space: config.INSERT_SPACE_CHANCE
 	}
 
 	# iterate over the organism, allow mutations to happen
@@ -52,17 +86,16 @@ def copy_and_mutate(organism):
 		event = roll_weighted_die(event_probabilities)
 
 		if event == letter_change:
-			#print letter_change
-			new_organism[i] = random.choice(string.ascii_lowercase)
+			#print event
+			new_organism[i] = random.choice(config.POSSIBLE_CHARACTERS)
 
-		if event == letter_duplication:
-			#print letter_duplication
-			new_organism.insert(i,new_organism[i])
+		if event == insert_space:
+			#print event
+			new_organism.insert(i,' ')
 
 		if event == letter_deletion:
-			#print letter_deletion
+			#print event
 			del new_organism[i]
-	    
 	return new_organism
 
 
@@ -73,47 +106,17 @@ def make_children(father, generation_size):
 	return children
 
 
-# Calculates the levenshtein distance between a and b. Lower levenshtein
-# distances means more similar strings, with a score of 0 meaning an identical
-# string. (taken from http://hetland.org/coding/python/levenshtein.py)
-def levenshtein(a,b):
-    n, m = len(a), len(b)
-    if n > m:
-        # Make sure n <= m, to use O(min(n,m)) space
-        a,b = b,a
-        n,m = m,n
-        
-    current = range(n+1)
-    for i in range(1,m+1):
-        previous, current = current, [i]+[0]*n
-        for j in range(1,n+1):
-            add, delete = previous[j]+1, current[j-1]+1
-            change = previous[j-1]
-            if a[j-1] != b[i-1]:
-                change = change + 1
-            current[j] = min(add, delete, change)
-            
-    return current[n]
-
-
-# this is a small helper function. our survival function is going to be based on
-# levenshtein distances, where levenshtein(a,b). we want to define 
-# string similarity as 'fitness'. for elegance though, we want higher fitness to mean 
-# survival, not lower fitness. this function inverts a levenshtein distance to give us
-# a number that approaches 1 as strings become more similar
-def levenshtein_fitness(a,b):
-	return 1.0/(1.0+levenshtein(a,b))
-
-
 # takes a generation of organisms as input, returns one survivor. an organisms
 # fitness is derived from the levenshtein distance between itself and the ideal_organism
 def survive_selectively(generation, ideal_organism):
 	best_fitness = 0
 	for child in generation:
-		child_fitness = levenshtein_fitness(child,ideal_organism)
-		if child_fitness > best_fitness:
+		child_fitness = config.FITNESS_FUNCTION(child,ideal_organism)
+		if child_fitness >= best_fitness:
 			survivor = child
 			best_fitness = child_fitness
 	return survivor
 
-
+def get_random_string(max_length):
+    random_string_length = random.randint(1,max_length)
+    return ''.join(random.choice(config.POSSIBLE_CHARACTERS) for x in range(random_string_length))
