@@ -1,5 +1,7 @@
 # Evolution Experiments
 
+`python evolve_sentence.py 'try evolving this sentence'
+
 At this stage, this is a pure 'messing around' side project. My first goal is to write an environment in which sentences like *Hello World* can evolve from any other sentence or collection of characters. 
 
 The desired process is modelled after evolution as best as I could muster. It starts from any set of characters (say, '324X!#$'), and then goes through a gradual process of:
